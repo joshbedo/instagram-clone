@@ -1,0 +1,30 @@
+{
+  "name": "instagram-clone",
+  "version": "1.0.0",
+  "description": "Allows you to send a photo to a number provided by twillio and returns a filtered image",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joshbedo/instagram-clone.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshbedo/instagram-clone/issues"
+  },
+  "homepage": "https://github.com/joshbedo/instagram-clone",
+  "dependencies": {
+    "boom": "^2.6.0",
+    "caman": "^4.1.2",
+    "hapi": "^7.5.2",
+    "joi": "^4.8.1",
+    "level": "^0.18.0",
+    "node-uuid": "^1.4.1",
+    "request": "^2.48.0",
+    "socket.io": "^1.2.0",
+    "twilio": "^1.8.0"
+  }
+}
