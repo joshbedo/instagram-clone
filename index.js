@@ -7,7 +7,16 @@ var Hapi = require('hapi'),
     request = require('request'),
     Caman   = require('caman').Caman,
     twilio  = require('twilio'),
-    twilioClient = new twilio.RestClient();
+    twilioClient = new twilio.RestClient(),
+    winston      = require('winston');
+
+// Setup winston for logging
+var logger = new (winston.Logger)({ 
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: 'logfile.log' })
+  ]
+});
 
 // TODO: Going to move this to a filters.js module once its working
 var filters = [
@@ -50,7 +59,7 @@ function applyFilter(mediaUrl, filter, from, to, url_base) {
       this.render(function() {
         // save to the fs
         this.save(filteredPath);
-        console.log('Saved: ', filtered);
+        logger.info('Saved: ', filtered);
         // delete tmp file
         fs.unlink(original, function(err) { console.log(err); });
         sendPhoto( url_base, filtered, from, to );
@@ -74,8 +83,8 @@ function handleMessage(req, reply) {
       token = process.env.TWILIO_AUTH_TOKEN,
       url_base = 'http://'+req.info.host;
 
-  console.log('request sent ', header, token, url_base);
-  console.log('request payload ', req.payload);
+  logger.log('request sent ', header, token, url_base);
+  logger.log('request payload ', req.payload);
   if( !twilio.validateRequest(token, header, url_base+'/message', req.payload) ) {
     reply(Boom.forbidden('Invalid x-twilio-signature'));
     return;
@@ -89,7 +98,7 @@ function handleMessage(req, reply) {
       // twim1 object for sending replies to users
       twiml = new twilio.TwimlResponse();
   
-  console.log('Processing MMS: ', mediaUrl, mediaContentType, filter);
+  logger.info('Processing MMS: ', mediaUrl, mediaContentType, filter);
   
   // verify that the filter exists in the list
   var filterValid = false;
@@ -101,8 +110,8 @@ function handleMessage(req, reply) {
 
   // check to see if the user has submitted an image and filter
   if( mediaUrl && mediaContentType && mediaContentType.indexOf('image') >= 0 ) {
-    console.log('filterValid ', filterValid);
-    console.log('filter ', filters[filters.indexOf(filter)]);
+    logger.log('filterValid ', filterValid);
+    logger.log('filter ', filters[filters.indexOf(filter)]);
     if( filterValid ) {
      // send `hang tight! working on it` message
      twiml.message('Hang tight! Applying filter');
@@ -135,7 +144,7 @@ function sendPhoto(url_base, photo, from, to) {
     body: 'Powered by Twilio MMS and Josh Bedo ;)',
     mediaUrl: photoUrl
   }, function( err, responseData ) {
-    if (err) { console.log('Error sending MMS: ', JSON.stringify(err) ); }
+    if (err) { logger.log('Error sending MMS: ', JSON.stringify(err) ); }
   });
 }
 
@@ -160,4 +169,4 @@ server.route([
 
 // Start the beast
 server.start();
-console.log('App has started on port ', process.env.PORT || 3000);
+logger.info('App has started on port ', process.env.PORT || 3000);

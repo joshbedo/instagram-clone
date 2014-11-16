@@ -25,6 +25,7 @@
     "node-uuid": "^1.4.1",
     "request": "^2.48.0",
     "socket.io": "^1.2.0",
-    "twilio": "^1.8.0"
+    "twilio": "^1.8.0",
+    "winston": "^0.8.3"
   }
 }
