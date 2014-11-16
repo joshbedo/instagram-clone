@@ -107,11 +107,19 @@ function handleMessage(req, reply) {
      applyFilter( mediaUrl, filter, from, to, url_base );
     } else {
      // respond with a list of valid filters
+     twim1.message('Hmmmm, I don\'t recognize the filter ' + filter + '\n\n'+
+     'Valid filters are: ' + filters.join(','));
+
+     reply(twim1.toString()).type('text/xml');
     }
   } else {
     // send instructions for the app
+    twim1.message('Thanks for trying Phonestagram, the photo filtering' + 
+    'works on any phone! Just text a photo to this number and include the' +
+    'filter you would like :) \n\n Valid filters are: ' + filters.join(','));
+    reply(twim1.toString()).type('text/xml');
   }
-}
+
 
 // Send an MMS message with filtered photo attached
 function sendPhoto(url_base, photo, from, to) {
@@ -123,7 +131,6 @@ function sendPhoto(url_base, photo, from, to) {
     mediaUrl: photoUrl
   }, function( err, responseData ) {
     if (err) { console.log('Error sending MMS: ', JSON.stringify(err) ); }
-  }
   });
 }
 
