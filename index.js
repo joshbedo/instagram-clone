@@ -119,6 +119,7 @@ function handleMessage(req, reply) {
     'filter you would like :) \n\n Valid filters are: ' + filters.join(','));
     reply(twim1.toString()).type('text/xml');
   }
+}
 
 
 // Send an MMS message with filtered photo attached
