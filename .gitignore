@@ -1,3 +1,6 @@
+# Ignore public directory
+static
+
 # Logs
 logs
 *.log
