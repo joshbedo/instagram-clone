@@ -74,6 +74,8 @@ function handleMessage(req, reply) {
       token = process.env.TWILIO_AUTH_TOKEN,
       url_base = 'http://'+req.info.host;
 
+  console.log('request sent ', header, token, url_base);
+  console.log('request payload ', req.payload);
   if( !twilio.validateRequest(token, header, url_base+'/message', req.payload) ) {
     reply(Boom.forbidden('Invalid x-twilio-signature'));
     return;
@@ -85,39 +87,41 @@ function handleMessage(req, reply) {
       mediaContentType = req.payload.MediaContentType0,
       filter = req.payload.Body.toLowerCase().trim(),
       // twim1 object for sending replies to users
-      twim1 = new twilio.Twim1Response();
+      twiml = new twilio.TwimlResponse();
   
   console.log('Processing MMS: ', mediaUrl, mediaContentType, filter);
   
   // verify that the filter exists in the list
   var filterValid = false;
   
-  if( filters.indexOf( filter.toLowerCase() ) !== -1 ) {
+  if( filters.indexOf( filter ) !== -1 ) {
     filterValid = true;
-    filter = filters.indexOf( filter.toLowerCase() );
+    filter = filters[filters.indexOf( filter )];
   }
 
   // check to see if the user has submitted an image and filter
-  if( mediaUrl && mediaContentType && mediaContentType.indexOf('image') !== 0 ) {
+  if( mediaUrl && mediaContentType && mediaContentType.indexOf('image') >= 0 ) {
+    console.log('filterValid ', filterValid);
+    console.log('filter ', filters[filters.indexOf(filter)]);
     if( filterValid ) {
      // send `hang tight! working on it` message
-     twim1.message('Hang tight! Applying filter');
-     reply(twim1.toString()).type('text/xml');
+     twiml.message('Hang tight! Applying filter');
+     reply(twiml.toString()).type('text/xml');
 
      applyFilter( mediaUrl, filter, from, to, url_base );
     } else {
      // respond with a list of valid filters
-     twim1.message('Hmmmm, I don\'t recognize the filter ' + filter + '\n\n'+
-     'Valid filters are: ' + filters.join(','));
+     twiml.message('Hmmmm, I don\'t recognize the filter ' + filter + '\n\n'+
+     'Valid filters are: ' + filters.join('\n'));
 
-     reply(twim1.toString()).type('text/xml');
+     reply(twiml.toString()).type('text/xml');
     }
   } else {
     // send instructions for the app
-    twim1.message('Thanks for trying Phonestagram, the photo filtering' + 
-    'works on any phone! Just text a photo to this number and include the' +
+    twiml.message('Thanks for trying Phonestagram, the photo filtering ' + 
+    'works on any phone! Just text a photo to this number and include the ' +
     'filter you would like :) \n\n Valid filters are: ' + filters.join(','));
-    reply(twim1.toString()).type('text/xml');
+    reply(twiml.toString()).type('text/xml');
   }
 }
 
@@ -128,7 +132,7 @@ function sendPhoto(url_base, photo, from, to) {
   
   twilioClient.sendMessage({
     to: from, from: to,
-    body: 'Powered by Twilio MMS',
+    body: 'Powered by Twilio MMS and Josh Bedo ;)',
     mediaUrl: photoUrl
   }, function( err, responseData ) {
     if (err) { console.log('Error sending MMS: ', JSON.stringify(err) ); }
